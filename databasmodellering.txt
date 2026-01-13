@@ -1,0 +1,136 @@
+Konceptionell modell
+
+Entiteter
+users
+messages
+messages_tag
+comments
+profiles
+tags
+
+Attribut
+users
+    id
+    username
+    password
+messages
+    id
+    text
+    timestamp
+    users_id
+messages_tag
+    messages_id
+    tag_id
+    sammansatt primärnyckel
+comments
+    id
+    text
+    timestamp
+    messages_id
+profile
+    id
+    picture
+    users_id
+tag
+    timestamp
+    comments_id
+    messages_id
+
+Relationer
+users - messages(1-*)
+users - comments(1-*)
+users - profile(1-1)
+users - tag(1-*)
+messages - comments(1-*)
+messages - tag(-)
+
+
+Logisk modell
+
+Logisk utgångspunkt
+users 1-* messages
+users 1-* comments
+users 1-1 profiles
+users 1-* tags
+messages (1-*) comments
+messages (-) tag
+
+Tabeller - logisk modell
+users
+    user_id(PK)
+    username
+    password
+messages
+    messages_id(PK)
+    text
+    timestamp
+    user_id(FK)
+messages_tag
+    messages_id, tag_id(PK)
+comments
+    comments_id(PK)
+    text
+    timestamp
+    messages_id(FK)
+profiles
+    profile_id(PK)
+    text
+    profile_picture_url
+    users_id(FK)
+tags
+    tag_id(PK)
+    name
+
+Full logisk modell
+users(user_id, username, password)
+messages(messages_id, text, timestamp, user_id)
+messages_tag(messages_id, tag_id)
+comments(comments_id, text, timestamp, messages_id)
+profile(profile_id, picture, users_id)
+tag(tag_id, timestamp, messages_id, comments_id)
+
+Fysisk modell SQL
+
+CREATE TABLE users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(100) NOT NULL,
+    password VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE messages (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    text VARCHAR(500),
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    users_id BIGINT NOT NULL,
+    FOREIGN KEY (users_id) REFERENCES users(id)
+);
+
+CREATE TABLE comments (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    message_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    text TEXT NOT NULL,
+    timestamp TIMESTAMP NOT NULL,
+    FOREIGN KEY (message_id) REFERENCES messages (id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE profiles (
+    user_id BIGINT PRIMARY KEY,
+    bio TEXT,
+    profile_image_url VARCHAR(500),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE tags (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE message_tag (
+    message_id BIGINT NOT NULL,
+    tag_id BIGINT NOT NULL,
+    PRIMARY KEY (message_id, tag_id),
+    FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+);

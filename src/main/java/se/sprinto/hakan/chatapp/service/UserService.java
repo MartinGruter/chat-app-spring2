@@ -20,6 +20,4 @@ public class UserService {
     public User register(User user) {
         return repo.save(user);
     }
-
-
 }
